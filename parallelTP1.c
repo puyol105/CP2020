@@ -13,7 +13,7 @@ double clearcache[30000000];
 void clearCache();
 void start(void);
 double stop_timer();
-void prepareMatrixs(char *path, int nlines, int ncols);
+void initMatrizes(char *path, int nlines, int ncols);
 
 int neighboursMatrix(int i, int j) {
   int sum = 0;
@@ -100,21 +100,23 @@ int transitionsImg(int i, int j) {
   return 0;
 }
 
-// Função referente à iteração na matriz para gerar o skeleton;
-void makeSkeleton(char *path, int nlines, int ncols) {
+// Esqueletizaçao
+void skeleton(char *path, int nlines, int ncols) {
+  int i, j, k, count = 1;
 
-  int i, j, count, iter = 1;
+  // Insere valores nas matrizes
+  initMatrizes(path, nlines, ncols);
 
-  prepareMatrixs(path, nlines, ncols);
-
-  // limpar cache
+  // Limpar cache
   clearCache();
+
+  // Inicia contagem
   start();
 
   int endlines = nlines - 2;
   int endcols = ncols - 2;
 
-  while (iter > 0) {
+  while (k > 0) {
     count = 0;
 
 #pragma omp parallel for collapse(2)
@@ -141,7 +143,7 @@ void makeSkeleton(char *path, int nlines, int ncols) {
       }
     }
 
-    iter = count;
+    k = count;
     count = 0;
 
 #pragma omp barrier
@@ -171,8 +173,8 @@ void makeSkeleton(char *path, int nlines, int ncols) {
       }
     }
 
-    if (iter == 0)
-      iter = count;
+    if (k == 0)
+      k = count;
 
 #pragma omp barrier
   }
@@ -195,38 +197,37 @@ void makeSkeleton(char *path, int nlines, int ncols) {
   fclose(f);
 }
 
-void prepareMatrixs(char *path, int nlines, int ncols) {
+// Inicializa e insere os valores da imagem nas matrizes
+void initMatrizes(char *path, int nlines, int ncols) {
   int j, i;
-  int var;
+  int pixel;
   char c;
 
   FILE *file = fopen(path, "r");
 
-  // Alocar memória para as linhas da matriz;
   img = malloc(nlines * sizeof(int *));
   matrix = malloc(nlines * sizeof(int *));
 
-  // Retirar os elementos do .txt e preencher a matriz;
   char aux[ncols];
+
+  // Inserir os valores da imagem nas matrizez
   for (i = 0; i < nlines; i++) {
     matrix[i] = malloc(ncols * sizeof(int));
     img[i] = malloc(ncols * sizeof(int));
 
+    // le linha da imagem e insere a no array auxiliar
     fscanf(file, "%s", aux);
-    // printf("%s\n", aux);
 
+    // insere cada caracter da linha na matriz
     for (j = 0; j < ncols; j++) {
       c = aux[j];
-      var = atoi(&c);
-      img[i][j] = var;
-      matrix[i][j] = var;
-      //           printf("%d", img[i][j]);
-    }
-    //    printf("\n");
-  }
-  // printf("\n");
+      pixel = atoi(&c);
 
-  // Fechar o ficheiro;
+      img[i][j] = pixel;
+      matrix[i][j] = pixel;
+    }
+  }
+
   fclose(file);
 }
 
@@ -234,42 +235,47 @@ int main(int argc, char **argv) {
   int nlines = 0, ncols = 0;
   char c;
 
-  FILE *file;
+  FILE *imgFile;
 
-  // Abrir o ficheiro;
-  file = fopen(argv[1], "r");
+  // Argumento tem de ser a imagem binária
+  imgFile = fopen(argv[1], "r");
 
-  // Percorre uma linha no ficheiro para descobrir o número de colunas;
-  for (c = getc(file); c != '\n'; c = getc(file)) {
+  // Contar numero de colunas
+  for (c = getc(imgFile); c != '\n'; c = getc(imgFile)) {
     ncols++;
   }
-  // Percorre o ficheiro para descobrir o número de linhas;
-  for (; c != EOF; c = getc(file)) {
+
+  // Contar numero de linhas
+  while (c != EOF) {
     if (c == '\n') {
-      nlines = nlines + 1;
+      nlines++;
     }
+    c = getc(imgFile);
   }
 
   // Voltar para o inicio do ficheiro;
-  fclose(file);
+  fclose(imgFile);
 
   // Função que aplica o algoritmo;
-  makeSkeleton(argv[1], nlines, ncols);
+  skeleton(argv[1], nlines, ncols);
 
   return 0;
 }
 
+// Limpa cache
 void clearCache(void) {
   int i;
   for (i = 0; i < 30000000; ++i)
     clearcache[i] = i;
 }
 
+// Começa a contar tempos
 void start(void) {
   double time = omp_get_wtime();
   initial_time = time * TIME_RESOLUTION;
 }
 
+// Para a contagem de tempo
 double stop_timer() {
   double time = omp_get_wtime();
   double final_time = time * TIME_RESOLUTION;
