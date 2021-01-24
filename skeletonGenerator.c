@@ -276,6 +276,6 @@ double stop_timer() {
   double time = omp_get_wtime();
   double final_time = time * TIME_RESOLUTION;
 
-  printf("Time: %f\n", final_time - initial_time);
+  printf("%f\n", final_time - initial_time);
   return final_time - initial_time;
 }
