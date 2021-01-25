@@ -143,7 +143,6 @@ void skeleton(char *path, int nlines, int ncols) {
     iter = count;
     count = 0;
 
-#pragma omp barrier
 #pragma omp parallel for collapse(2)
     for (i = 1; i <= endlines; i++) {
       for (j = 1; j <= endcols; j++) {
@@ -173,7 +172,6 @@ void skeleton(char *path, int nlines, int ncols) {
     if (iter == 0)
       iter = count;
 
-#pragma omp barrier
   }
 
   stop_timer();
