@@ -11,7 +11,7 @@ double initial_time;
 double clearcache[30000000];
 
 void clearCache();
-void start(void);
+void start();
 double stop_timer();
 void initMatrizes(char *path, int nlines, int ncols);
 
@@ -116,7 +116,8 @@ void skeleton(char *path, int nlines, int ncols) {
   while (iter > 0) {
     count = 0;
 
-#pragma omp parallel for collapse(2)
+  omp_set_dynamic(0);
+  #pragma omp parallel for collapse(2) num_threads(4)
     for (i = 1; i <= endlines; i++) {
       for (j = 1; j <= endcols; j++) {
 
@@ -143,7 +144,8 @@ void skeleton(char *path, int nlines, int ncols) {
     iter = count;
     count = 0;
 
-#pragma omp parallel for collapse(2)
+  omp_set_dynamic(0);
+  #pragma omp parallel for collapse(2) num_threads(4)
     for (i = 1; i <= endlines; i++) {
       for (j = 1; j <= endcols; j++) {
 
@@ -255,14 +257,14 @@ int main(int argc, char **argv) {
 }
 
 // Limpa cache
-void clearCache(void) {
+void clearCache() {
   int i;
   for (i = 0; i < 30000000; ++i)
     clearcache[i] = i;
 }
 
 // Começa a contar tempos
-void start(void) {
+void start() {
   double time = omp_get_wtime();
   initial_time = time * TIME_RESOLUTION;
 }
