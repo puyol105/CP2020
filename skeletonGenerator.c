@@ -15,85 +15,84 @@ void start(void);
 double stop_timer();
 void initMatrizes(char *path, int nlines, int ncols);
 
-int neighboursMatrix(int i, int j) {
+int matrizVizinhos(int i, int j) {
   int sum = 0;
 
-  // Soma todos os vizinhos de P1;
+  // Somar todos os vizinhos de P1
   sum = matrix[i - 1][j] + matrix[i - 1][j + 1] + matrix[i][j + 1] +
         matrix[i + 1][j + 1] + matrix[i + 1][j] + matrix[i + 1][j - 1] +
         matrix[i][j - 1] + matrix[i - 1][j - 1];
 
-  // Verifica a condição do Algoritmo;
+  // Verifica condiçao do algoritmo
   if (2 <= sum && sum <= 6) {
     return 1;
   }
   return 0;
 }
 
-int neighboursImg(int i, int j) {
+int imgVizinhos(int i, int j) {
   int sum = 0;
 
-  // Soma todos os vizinhos de P1;
+  // Somar todos os vizinhos de P1
   sum = img[i - 1][j] + img[i - 1][j + 1] + img[i][j + 1] + img[i + 1][j + 1] +
         img[i + 1][j] + img[i + 1][j - 1] + img[i][j - 1] + img[i - 1][j - 1];
 
-  // Verifica a condição do Algoritmo;
+  // Verifica condiçao do algoritmo
   if (2 <= sum && sum <= 6) {
     return 1;
   }
   return 0;
 }
 
-int transitionsMatrix(int i, int j) {
-
+int matrizTransitions(int i, int j) {
   int count = 0, arr[9], n = 9;
 
-  // Guarda no array os vizinhos de P1.
-  arr[0] = matrix[i - 1][j];     // p2
-  arr[1] = matrix[i - 1][j + 1]; // p3
+  // Guarda no array os vizinhos de P1
+  arr[0] = matrix[i - 1][j];
+  arr[1] = matrix[i - 1][j + 1];
   arr[2] = matrix[i][j + 1];
   arr[3] = matrix[i + 1][j + 1];
   arr[4] = matrix[i + 1][j];
   arr[5] = matrix[i + 1][j - 1];
   arr[6] = matrix[i][j - 1];
   arr[7] = matrix[i - 1][j - 1];
-  arr[8] = matrix[i - 1][j]; // p2
+  arr[8] = matrix[i - 1][j];
 
-  // Verifica as transições que existem.
+  // Verifica as transições que existem
   for (i = 0; i < n - 1; i++) {
     if (arr[i] == 0 && arr[i + 1] == 1)
       count++;
   }
 
-  // Verifica a condição do Algoritmo;
+  // Verifica condiçao do algoritmo
   if (count == 1)
     return 1;
 
   return 0;
 }
 
-int transitionsImg(int i, int j) {
+int imgTransitions(int i, int j) {
 
   int count = 0, arr[9], n = 9;
 
-  // Guarda no array os vizinhos de P1.
-  arr[0] = img[i - 1][j];     // p2
-  arr[1] = img[i - 1][j + 1]; // p3
+  // Guarda no array os vizinhos de P1
+  arr[0] = img[i - 1][j];
+  arr[1] = img[i - 1][j + 1];
   arr[2] = img[i][j + 1];
   arr[3] = img[i + 1][j + 1];
   arr[4] = img[i + 1][j];
   arr[5] = img[i + 1][j - 1];
   arr[6] = img[i][j - 1];
   arr[7] = img[i - 1][j - 1];
-  arr[8] = img[i - 1][j]; // p2
+  arr[8] = img[i - 1][j];
 
-  // Verifica as transições que existem.
+  // Verifica as transições que existem
   for (i = 0; i < n - 1; i++) {
     if (arr[i] == 0 && arr[i + 1] == 1)
       count++;
   }
 
-  // Verifica a condição do Algoritmo;
+  // Verifica condiçao do algoritmo
   if (count == 1)
     return 1;
 
@@ -129,7 +128,7 @@ void skeleton(char *path, int nlines, int ncols) {
 
           if (!(matrix[i][j + 1] && matrix[i + 1][j] && matrix[i - 1][j]) &&
               !(matrix[i][j + 1] && matrix[i + 1][j] && matrix[i][j - 1]) &&
-              neighboursMatrix(i, j) && transitionsMatrix(i, j)) {
+              matrizVizinhos(i, j) && matrizTransitions(i, j)) {
 
             img[i][j] = 0;
             count++;
@@ -157,7 +156,7 @@ void skeleton(char *path, int nlines, int ncols) {
 
           if (!(img[i][j + 1] && img[i - 1][j] && img[i][j - 1]) &&
               !(img[i - 1][j] && img[i + 1][j] && img[i][j - 1]) &&
-              neighboursImg(i, j) && transitionsImg(i, j)) {
+              imgVizinhos(i, j) && imgTransitions(i, j)) {
             matrix[i][j] = 0;
             count++;
           }
@@ -249,10 +248,9 @@ int main(int argc, char **argv) {
     c = getc(file);
   }
 
-  // Voltar para o inicio do ficheiro;
   fclose(file);
 
-  // Função que aplica o algoritmo;
+  // Aplica algoritmo de esqueletizaçao
   skeleton(argv[1], nlines, ncols);
 
   return 0;
